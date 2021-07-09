@@ -1,0 +1,197 @@
+	section	.text,"ax",@progbits
+	assume	adl = 1
+	section	.text,"ax",@progbits
+	public	_init_Keys
+_init_Keys:
+	ld	hl, -3
+	call	__frameset
+	ld	hl, 16
+	push	hl
+	call	_malloc
+	pop	de
+	ld	(_kb_Previous), hl
+	ld	hl, 16
+	push	hl
+	call	_malloc
+	pop	de
+	ld	(_kb_Falling), hl
+	ld	hl, 16
+	push	hl
+	call	_malloc
+	ld	(ix + -3), hl
+	pop	de
+	ld	(_kb_Rising), hl
+	ld	bc, (_kb_Previous)
+	ld	hl, -720880
+	ld	a, (hl)
+	ld	de, 8
+	push	de
+	ld	e, a
+	push	de
+	push	bc
+	call	_memset
+	pop	hl
+	pop	hl
+	pop	hl
+	ld	iy, (_kb_Falling)
+	or	a, a
+	sbc	hl, hl
+	ld	(iy), hl
+	ld	(iy + 3), hl
+	ld.sis	de, 0
+	ld	(iy + 6), e
+	ld	(iy + 7), d
+	ld	iy, (ix + -3)
+	ld	(iy), hl
+	ld	(iy + 3), hl
+	ld	(iy + 6), e
+	ld	(iy + 7), d
+	pop	hl
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_scan_kb
+_scan_kb:
+	ld	hl, -18
+	call	__frameset
+	ld	bc, -720880
+	ld	hl, 128
+	ld	de, (_kb_Previous)
+	push	hl
+	push	bc
+	push	de
+	call	_memcpy
+	pop	hl
+	pop	hl
+	pop	hl
+	call	_kb_Scan
+	ld	iy, 0
+	ld	hl, (_kb_Previous)
+	ld	(ix + -6), hl
+	ld	hl, (_kb_Rising)
+	ld	(ix + -9), hl
+	ld	hl, (_kb_Falling)
+	ld	(ix + -12), hl
+	ld	de, 16
+BB1_1:
+	lea	hl, iy + 0
+	or	a, a
+	sbc	hl, de
+	jq	z, BB1_3
+	lea	de, iy + 0
+	ld	hl, -720880
+	add	hl, de
+	ld	(ix + -15), hl
+	push	de
+	ld	e, (hl)
+	inc	hl
+	ld	d, (hl)
+	ld	l, e
+	ld	h, d
+	pop	de
+	ld	(ix + -3), l
+	ld	(ix + -2), h
+	ld	hl, (ix + -6)
+	add	hl, de
+	ld	(ix + -18), hl
+	ld	c, (hl)
+	inc	hl
+	ld	b, (hl)
+	ld	l, c
+	ld	h, b
+	ld.sis	bc, -1
+	call	__sxor
+	ld	c, l
+	ld	b, h
+	ld	l, (ix + -3)
+	ld	h, (ix + -2)
+	call	__sand
+	ld	(ix + -3), iy
+	ld	iy, (ix + -9)
+	add	iy, de
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	hl, (ix + -15)
+	push	de
+	ld	e, (hl)
+	inc	hl
+	ld	d, (hl)
+	ld	l, e
+	ld	h, d
+	pop	de
+	ld	iy, (ix + -18)
+	push	hl
+	ld	l, (iy)
+	ld	h, (iy + 1)
+	ex	(sp), hl
+	pop	iy
+	ld.sis	bc, -1
+	call	__sxor
+	ld	c, l
+	ld	b, h
+	ex	de, hl
+	ld	e, iyl
+	ld	d, iyh
+	ex	de, hl
+	call	__sand
+	ld	iy, (ix + -12)
+	add	iy, de
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	iy, (ix + -3)
+	ld	de, 2
+	add	iy, de
+	ld	de, 16
+	jq	BB1_1
+BB1_3:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_end_kb
+_end_kb:
+	ld	hl, (_kb_Previous)
+	push	hl
+	call	_free
+	pop	hl
+	ld	hl, (_kb_Falling)
+	push	hl
+	call	_free
+	pop	hl
+	ld	hl, (_kb_Rising)
+	push	hl
+	call	_free
+	pop	hl
+	ret
+	section	.text,"ax",@progbits
+
+	section	.bss,"aw",@nobits
+	public	_kb_Previous
+_kb_Previous:
+	rb	3
+
+	section	.bss,"aw",@nobits
+	public	_kb_Falling
+_kb_Falling:
+	rb	3
+
+	section	.bss,"aw",@nobits
+	public	_kb_Rising
+_kb_Rising:
+	rb	3
+
+	ident	"clang version 12.0.0 (https://github.com/jacobly0/llvm-project 170be88120e3aa88c20eea5615ba76b8f1d6c647)"
+	extern	_memset
+	extern	__Unwind_SjLj_Register
+	extern	__frameset
+	extern	_malloc
+	extern	__Unwind_SjLj_Unregister
+	extern	_kb_Scan
+	extern	_free
+	extern	__sand
+	extern	_memcpy
+	extern	__sxor

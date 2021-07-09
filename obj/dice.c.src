@@ -1,0 +1,160 @@
+	section	.text,"ax",@progbits
+	assume	adl = 1
+	section	.text,"ax",@progbits
+	public	_singleAttack
+_singleAttack:
+	ld	hl, -9
+	call	__frameset
+	ld.sis	hl, 0
+	ld	(ix + -2), l
+	ld	(ix + -1), h
+	call	_random
+	ld	bc, 6
+	call	__iremu
+	ld	a, l
+	inc	a
+	ld	(ix + -3), a
+	ld	hl, (ix + 6)
+	ld	hl, (hl)
+	ld	de, 3
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	jq	m, BB0_3
+	call	_random
+	ld	bc, 6
+	call	__iremu
+	ld	a, l
+	inc	a
+	ld	(ix + -2), a
+	ld	hl, (ix + 6)
+	ld	hl, (hl)
+	ld	de, 4
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	jq	m, BB0_3
+	call	_random
+	ld	bc, 6
+	call	__iremu
+	ld	a, l
+	inc	a
+	ld	(ix + -1), a
+BB0_3:
+	lea	hl, ix + -3
+	ld	(ix + -9), hl
+	call	_random
+	ld	hl, (ix + 9)
+	ld	hl, (hl)
+	ld	de, 2
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	call	p, _random
+	ld	de, 0
+	push	de
+	pop	bc
+	push	bc
+	pop	hl
+	ld	de, 3
+BB0_6:
+	ld	(ix + -6), hl
+	or	a, a
+	sbc	hl, de
+	push	bc
+	pop	iy
+	jq	z, BB0_7
+BB0_8:
+	push	bc
+	pop	hl
+	or	a, a
+	sbc	hl, de
+	jq	z, BB0_9
+	ld	hl, (ix + -9)
+	push	hl
+	pop	iy
+	add	iy, bc
+	ld	a, (iy)
+	ld	de, (ix + -6)
+	add	hl, de
+	ld	e, a
+	ld	a, (hl)
+	cp	a, e
+	jq	nc, BB0_12
+	ld	(hl), e
+	ld	(iy), a
+BB0_12:
+	inc	bc
+	ld	iy, 0
+	ld	de, 3
+	jq	BB0_8
+BB0_9:
+	ld	hl, (ix + -6)
+	inc	hl
+	ld	de, 3
+	lea	bc, iy + 0
+	jq	BB0_6
+BB0_7:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_limitRoll
+_limitRoll:
+	call	__frameset0
+	ld	iy, (ix + 6)
+	ld	hl, (ix + 12)
+	ld	bc, 1
+BB1_1:
+	ld	de, (iy)
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	jq	p, BB1_4
+	ld	hl, (ix + 9)
+	ld	hl, (hl)
+	or	a, a
+	sbc	hl, bc
+	call	__setflag
+	jq	m, BB1_4
+	ld	hl, (ix + 9)
+	push	hl
+	push	iy
+	call	_singleAttack
+	ld	bc, 1
+	ld	hl, (ix + 12)
+	ld	iy, (ix + 6)
+	pop	de
+	pop	de
+	jq	BB1_1
+BB1_4:
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	_blitzRoll
+_blitzRoll:
+	call	__frameset0
+	ld	hl, (ix + 6)
+	ld	de, (ix + 9)
+	ld	bc, 1
+	push	bc
+	push	de
+	push	hl
+	call	_limitRoll
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	ident	"clang version 12.0.0 (https://github.com/jacobly0/llvm-project 170be88120e3aa88c20eea5615ba76b8f1d6c647)"
+	extern	_random
+	extern	__setflag
+	extern	__Unwind_SjLj_Register
+	extern	__Unwind_SjLj_Unregister
+	extern	__frameset
+	extern	__iremu
+	extern	__frameset0
