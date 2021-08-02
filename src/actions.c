@@ -17,10 +17,12 @@ void transferTroops(territory_t* from, territory_t* to, int numMove){
 
 /*====TERRITORY====*/
 
-void gainTerritory(user_t* user, territory_t* territory){
+void gainTerritory(user_t* user, territory_t* territory, gfx_sprite_t* map, uint8_t* pal){
     user->nTerritories++;
     user->userTerritories[user->nTerritories - 1] = territory->id;
     territory->owner = user;
+    pal[map->data[territory->x + territory->y * MAP_WIDTH] * 2] = pal[6 + user->id * 2];
+    pal[map->data[territory->x + territory->y * MAP_WIDTH] * 2 + 1] = pal[7 + user->id * 2];
 }
 
 void loseTerritory(user_t* user, territory_t* territory){
