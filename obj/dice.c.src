@@ -3,9 +3,11 @@
 	section	.text,"ax",@progbits
 	public	_singleAttack
 _singleAttack:
-	ld	hl, -9
+	ld	hl, -21
 	call	__frameset
 	ld.sis	hl, 0
+	ld	e, 0
+	ld	(ix + -15), de
 	ld	(ix + -2), l
 	ld	(ix + -1), h
 	call	_random
@@ -14,8 +16,8 @@ _singleAttack:
 	ld	a, l
 	inc	a
 	ld	(ix + -3), a
-	ld	hl, (ix + 6)
-	ld	hl, (hl)
+	ld	iy, (ix + 6)
+	ld	hl, (iy + 14)
 	ld	de, 3
 	or	a, a
 	sbc	hl, de
@@ -27,8 +29,8 @@ _singleAttack:
 	ld	a, l
 	inc	a
 	ld	(ix + -2), a
-	ld	hl, (ix + 6)
-	ld	hl, (hl)
+	ld	iy, (ix + 6)
+	ld	hl, (iy + 14)
 	ld	de, 4
 	or	a, a
 	sbc	hl, de
@@ -41,60 +43,151 @@ _singleAttack:
 	inc	a
 	ld	(ix + -1), a
 BB0_3:
-	lea	hl, ix + -3
-	ld	(ix + -9), hl
 	call	_random
-	ld	hl, (ix + 9)
-	ld	hl, (hl)
+	ld	bc, 6
+	call	__iremu
+	inc	l
+	ld	(ix + -6), hl
+	ld	iy, (ix + 9)
+	ld	hl, (iy + 14)
 	ld	de, 2
 	or	a, a
 	sbc	hl, de
 	call	__setflag
-	call	p, _random
+	jq	m, BB0_5
+	call	_random
+	ld	bc, 6
+	call	__iremu
+	inc	l
+	ld	(ix + -15), hl
+BB0_5:
+	lea	hl, ix + -3
+	ld	(ix + -21), hl
+	ld	iy, (ix + 6)
+	lea	hl, iy + 14
+	ld	(ix + -18), hl
+	ld	iy, (ix + 9)
+	lea	hl, iy + 14
+	ld	(ix + -12), hl
 	ld	de, 0
 	push	de
-	pop	bc
-	push	bc
 	pop	hl
-	ld	de, 3
+	ld	bc, 3
 BB0_6:
-	ld	(ix + -6), hl
+	ld	(ix + -9), hl
 	or	a, a
-	sbc	hl, de
-	push	bc
+	sbc	hl, bc
+	push	de
 	pop	iy
 	jq	z, BB0_7
-BB0_8:
-	push	bc
+BB0_22:
+	push	de
 	pop	hl
 	or	a, a
-	sbc	hl, de
-	jq	z, BB0_9
-	ld	hl, (ix + -9)
+	sbc	hl, bc
+	jq	z, BB0_23
+	ld	hl, (ix + -21)
 	push	hl
 	pop	iy
-	add	iy, bc
+	add	iy, de
 	ld	a, (iy)
-	ld	de, (ix + -6)
-	add	hl, de
-	ld	e, a
+	ld	bc, (ix + -9)
+	add	hl, bc
+	ld	c, a
 	ld	a, (hl)
-	cp	a, e
-	jq	nc, BB0_12
-	ld	(hl), e
+	cp	a, c
+	jq	nc, BB0_26
+	ld	(hl), c
 	ld	(iy), a
-BB0_12:
-	inc	bc
+BB0_26:
+	inc	de
 	ld	iy, 0
-	ld	de, 3
-	jq	BB0_8
-BB0_9:
-	ld	hl, (ix + -6)
+	ld	bc, 3
+	jq	BB0_22
+BB0_23:
+	ld	hl, (ix + -9)
 	inc	hl
-	ld	de, 3
-	lea	bc, iy + 0
+	ld	bc, 3
+	lea	de, iy + 0
 	jq	BB0_6
 BB0_7:
+	ld	bc, (ix + -6)
+	ld	a, c
+	ld	de, (ix + -15)
+	cp	a, e
+	jq	c, BB0_8
+	ld	l, 0
+	jq	BB0_10
+BB0_8:
+	ld	l, 1
+BB0_10:
+	bit	0, l
+	ld	a, e
+	jq	nz, BB0_12
+	ld	a, c
+BB0_12:
+	bit	0, l
+	jq	nz, BB0_14
+	ld	c, e
+BB0_14:
+	ld	l, (ix + -3)
+	cp	a, l
+	jq	c, BB0_15
+	ld	a, 0
+	jq	BB0_17
+BB0_15:
+	ld	a, 1
+BB0_17:
+	bit	0, a
+	ld	iy, (ix + -12)
+	jq	nz, BB0_19
+	ld	iy, (ix + -18)
+BB0_19:
+	ld	(ix + -6), bc
+	bit	0, a
+	ld	hl, (ix + -12)
+	jq	nz, BB0_21
+	ld	hl, (ix + -18)
+BB0_21:
+	ld	de, (iy)
+	dec	de
+	ld	(hl), de
+	ld	a, (ix + -2)
+	ld	bc, 0
+	push	bc
+	pop	hl
+	ld	l, a
+	ld	de, (ix + -6)
+	ld	c, e
+	call	__imulu
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jq	z, BB0_30
+	ld	l, a
+	ld	a, e
+	cp	a, l
+	jq	c, BB0_29
+	ld	hl, (ix + -18)
+	ld	(ix + -12), hl
+BB0_29:
+	ld	iy, (ix + -12)
+	ld	hl, (iy)
+	dec	hl
+	ld	(iy), hl
+BB0_30:
+	ld	iy, (ix + 9)
+	ld	hl, (iy + 14)
+	ld	de, 1
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	jq	m, BB0_31
+	ld	a, 0
+	jq	BB0_33
+BB0_31:
+	ld	a, 1
+BB0_33:
 	ld	sp, ix
 	pop	ix
 	ret
@@ -104,32 +197,44 @@ BB0_7:
 	public	_limitRoll
 _limitRoll:
 	call	__frameset0
-	ld	iy, (ix + 6)
 	ld	hl, (ix + 12)
-	ld	bc, 1
 BB1_1:
-	ld	de, (iy)
+	ld	iy, (ix + 6)
+	ld	bc, (iy + 14)
+	ld	iy, (ix + 9)
+	ld	de, (iy + 14)
 	or	a, a
-	sbc	hl, de
+	sbc	hl, bc
 	call	__setflag
 	jq	p, BB1_4
-	ld	hl, (ix + 9)
-	ld	hl, (hl)
+	push	de
+	pop	hl
+	ld	bc, 1
 	or	a, a
 	sbc	hl, bc
 	call	__setflag
 	jq	m, BB1_4
 	ld	hl, (ix + 9)
 	push	hl
-	push	iy
+	ld	hl, (ix + 6)
+	push	hl
 	call	_singleAttack
-	ld	bc, 1
+	pop	hl
+	pop	hl
 	ld	hl, (ix + 12)
-	ld	iy, (ix + 6)
-	pop	de
-	pop	de
 	jq	BB1_1
 BB1_4:
+	ex	de, hl
+	ld	de, 1
+	or	a, a
+	sbc	hl, de
+	call	__setflag
+	jq	m, BB1_5
+	ld	a, 0
+	jq	BB1_7
+BB1_5:
+	ld	a, 1
+BB1_7:
 	pop	ix
 	ret
 	section	.text,"ax",@progbits
@@ -157,4 +262,5 @@ _blitzRoll:
 	extern	__Unwind_SjLj_Unregister
 	extern	__frameset
 	extern	__iremu
+	extern	__imulu
 	extern	__frameset0
