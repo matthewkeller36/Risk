@@ -26,8 +26,8 @@ void gainTerritory(user_t* user, territory_t* territory){
 void loseTerritory(user_t* user, territory_t* territory){
     int i;
     for(i = 0; i < user->nTerritories; i++){
-        if(user->userTerritories[i] = territory->id){
-            for(i; i < user->nTerritories; i++){
+        if(user->userTerritories[i] == territory->id){
+            for(; i < user->nTerritories; i++){
                 user->userTerritories[i] = user->userTerritories[i + 1];
             }
             user->nTerritories--;
@@ -54,7 +54,7 @@ bool checkContinent(user_t* user, continent_t* continent){
 
 void gainContinent(user_t* user, continent_t* continent){
     if(checkContinent(user, continent)){
-        user->continents[user->nContinents] = continent;
+        user->continents[user->nContinents] = continent->id;
         user->nContinents++;
         continent->owner = user;
     }
@@ -64,8 +64,8 @@ void loseContinent(user_t* user, continent_t* continent){
     if(!checkContinent(user, continent)){
         int i;
         for(i = 0; i < user->nContinents; i++){
-            if(user->continents[i] = continent->id){
-                for(i; i < user->nContinents; i++){
+            if(user->continents[i] == continent->id){
+                for(; i < user->nContinents; i++){
                     user->continents[i] = user->continents[i + 1];
                 }
                 user->nContinents--;
