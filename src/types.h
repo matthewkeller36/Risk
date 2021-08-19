@@ -6,8 +6,8 @@
 #include <fileioc.h>
 #include <graphx.h>
 
-#define MAP_WIDTH 160
-#define MAP_HEIGHT 120
+#define MAP_WIDTH 140
+#define MAP_HEIGHT 100
 
 typedef struct {
     uint8_t id;
@@ -59,7 +59,8 @@ bool limitRoll(territory_t*, territory_t*, int);
 bool blitzRoll(territory_t*, territory_t*);
 
 /*====GAME====*/
-void readGameData(game_t*, char*);
+void initGame(game_t*, char*, uint8_t);
+void randomAssignTerritories(game_t*);
 void freeGame(game_t*);
 void addTroops(territory_t*, int);
 void removeTroops(territory_t*, int);
@@ -70,7 +71,7 @@ int gain(user_t*);
 void initTerritories(territory_t**, uint8_t, ti_var_t);
 void freeTerritory(territory_t*);
 void freeAllTerritories(territory_t**, uint8_t);
-void gainTerritory(user_t*, territory_t*);
+void gainTerritory(user_t*, territory_t*, gfx_sprite_t*, uint8_t*);
 void loseTerritory(user_t*, territory_t*);
 
 /*====CONTINENT====*/
@@ -82,11 +83,14 @@ void gainContinent(user_t*, continent_t*);
 void loseContinent(user_t*, continent_t*);
 
 /*====USER====*/
-void initNewUser();
+void initUsers(user_t**, uint8_t, uint8_t, uint8_t);
+void freeUser(user_t*);
+void freeAllUsers(user_t**, uint8_t);
 
 /*====TESTING====*/
-void dispTerritory(territory_t*, int, int);
-void dispContinent(continent_t*, int, int);
+void dispTerritory(territory_t*, int x, int y);
+void dispContinent(continent_t*, int x, int y);
+void dispUser(user_t* user, int x, int y);
 void runTestFile();
 
 #endif
