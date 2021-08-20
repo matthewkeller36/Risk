@@ -54,18 +54,94 @@ typedef struct {
 }game_t;
 
 /*====DICE====*/
-bool singleAttack(territory_t*, territory_t*);
-bool limitRoll(territory_t*, territory_t*, int);
-bool blitzRoll(territory_t*, territory_t*);
+/**
+ * @brief Performs a single attack between two territories
+ * using maximum amount of dice 
+ * 
+ * @param attacker Pointer to attacking territory
+ * @param defender Pointer to defending territory
+ * @return true if attacker won, false if attacker lost
+ */
+bool singleAttack(territory_t* attacker, territory_t* defender);
+
+/**
+ * @brief Attacks until \p attacker reaches \p limit troops or defender loses
+ * 
+ * @param attacker Pointer to attacking territory
+ * @param defender Pointer to defending territory
+ * @param limit Lowest amount of troops for \p attacker to end with
+ * @return true if attacker won, false if limit was reached
+ */
+bool limitRoll(territory_t* attacker, territory_t* defender, int limit);
+/**
+ * @brief Attacks until \p attacker reaches 1 troop or defender loses
+ * Effectively runs limitRoll with \p limit of 1
+ * 
+ * @param attacker Pointer to attacking territory
+ * @param defender Pointer to defending territory
+ * @return true if attacker won, false if limit was reached
+ */
+bool blitzRoll(territory_t* attacker, territory_t* defender);
 
 /*====GAME====*/
-void initGame(game_t*, char*, uint8_t);
-void randomAssignTerritories(game_t*);
-void freeGame(game_t*);
-void addTroops(territory_t*, int);
-void removeTroops(territory_t*, int);
-void transferTroops(territory_t*, territory_t*, int);
-int gain(user_t*);
+
+/**
+ * @brief Initializes \p game for \p nUsers reading data from \p fileName
+ * 
+ * @param game Pointer to game to initialize
+ * @param fileName Name of appvar to read data from
+ * @param nUsers Number of users to create for the game
+ */
+void initGame(game_t* game, char* fileName, uint8_t nUsers);
+
+/**
+ * @brief Randomly assigns all territories to users. \p game must be initialized before randomly assigning territories
+ * 
+ * @param game Pointer to initiated game
+ * 
+ */
+void randomAssignTerritories(game_t* game);
+
+/**
+ * @brief Frees all dynamic memory allocated in \p game 
+ * 
+ * @param game  Pointer to game to free
+ */
+void freeGame(game_t* game);
+
+/**
+ * @brief Adds troops to a given territory
+ * 
+ * @param territory Pointer to territory to add troops to
+ * @param numTroops Number of troops to be added
+ */
+void addTroops(territory_t* territory, int numTroops);
+
+/**
+ * @brief Removes troops from a given territory
+ * 
+ * @param territory Pointer to territory to remove troops from
+ * @param numTroops Number of troops to be removed
+ */
+void removeTroops(territory_t* territory, int numTroops);
+
+/**
+ * @brief Transfers \p numMove troops from \p from to \p to
+ * 
+ * @param from Pointer to territory to remove troops from
+ * @param to Pointer to territory to add troops to
+ * @param numMove Number of troops to transfer
+ */
+void transferTroops(territory_t* from, territory_t* to, int numMove);
+
+/**
+ * @brief Calculates the number of troops a user should gain
+ * 
+ * @param user Pointer to user to calculate gain
+ * 
+ * @return Number of troops the user should gain
+ */
+int gain(user_t* user);
 
 /*====TERRITORY====*/
 void initTerritories(territory_t**, uint8_t, ti_var_t);
