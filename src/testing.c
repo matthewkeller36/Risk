@@ -3,22 +3,27 @@
 void runTestFile(){
     game_t* game = malloc(sizeof(game_t));
     int i, j;
-    readGameData(game, "RTEST");
-    gfx_Begin();
-    for(i = 0; i < game->nTerritories; i++){
-        dispTerritory(game->territories[i], 2, 2);
-    }
-    j = i;
-    for(i = 0; i < game->nContinents; i++){
-        dispContinent(game->continents[i], 2, (j + i) * 14 + 16);
-    }
+    initGame(game, "RTEST", 6);
+    randomAssignTerritories(game);
+    // for(i = 0; i < game->nTerritories; i++){
+    //     dispTerritory(game->territories[i], 2, 2);
+    // }
+    // j = i;
+    // for(i = 0; i < game->nContinents; i++){
+    //     dispContinent(game->continents[i], 2, 2);
+    // }
+    // dispUser(game->users[0], 4, 4);
+    gfx_SetPalette(game->palette, game->paletteSize, 0);
+
+    gainTerritory(game->users[0], game->territories[4], game->map, game->palette);
+    // dispUser(game->users[0], 4, 4);
     gfx_SetPalette(game->palette, game->paletteSize, 0);
     gfx_ScaledSprite_NoClip(game->map, 0, 0, 2, 2);
-    gfx_SetTextXY(4, LCD_HEIGHT - 14);
-    gfx_PrintUInt(game->paletteSize, 3);
+    for(i = 0; i < game->nTerritories; i++){
+        printTerritoryTroops(game->territories[i]);
+    }
     while(!(os_GetCSC()));
     freeGame(game);
-    gfx_End();
 }
 
 void dispTerritory(territory_t* territory, int x, int y){
@@ -46,7 +51,6 @@ void dispTerritory(territory_t* territory, int x, int y){
         gfx_PrintChar(' ');
     }
     while(!os_GetCSC());
-    
 }
 
 void dispContinent(continent_t* continent, int x, int y){
@@ -69,4 +73,25 @@ void dispContinent(continent_t* continent, int x, int y){
         gfx_PrintUInt(continent->territories[i], 2);
         gfx_PrintChar(' ');
     }
+    while(!(os_GetCSC()));
+}
+
+void dispUser(user_t* user, int x, int y){
+    int i;
+    gfx_FillScreen(255);
+    gfx_PrintStringXY("ID: ", x, y);
+    gfx_PrintUInt(user->id, 2);
+    gfx_PrintStringXY("# Territories: ", x, y + 12);
+    gfx_PrintUInt(user->nTerritories, 2);
+    gfx_PrintStringXY("Territories: ", x, y + 24);
+    for(i = 0; i < user->nTerritories; i++){
+        gfx_PrintUInt(user->userTerritories[i], 2);
+        gfx_PrintChar(' ');
+    }
+    gfx_PrintStringXY("# Continents: ", x, y + 36);
+    gfx_PrintUInt(user->nTerritories, 2);
+    gfx_PrintStringXY("Continents: ", x, y + 48);
+    gfx_PrintStringXY("New Troops: ", x, y + 60);
+    gfx_PrintUInt(user->newTroops, 2);
+    while(!(os_GetCSC()));
 }
