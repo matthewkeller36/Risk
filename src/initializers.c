@@ -42,7 +42,7 @@ void initGame(game_t* game, char* fileName, uint8_t nUsers){
     }
     game->nUsers = nUsers;
     game->users = malloc(game->nUsers * sizeof(user_t*));
-    initUsers(game->users, game->nUsers, game->nContinents, game->nTerritories);
+    initUsers(game->users, game->nUsers, game->nTerritories);
     
 }
 
@@ -146,7 +146,7 @@ void freeAllContinents(continent_t** continents, uint8_t nContinents){
 }
 
 /*====USER====*/
-void initUsers(user_t** user, uint8_t nUsers, uint8_t gameContinents, uint8_t gameTerritories){
+void initUsers(user_t** user, uint8_t nUsers, uint8_t gameTerritories){
     for(uint8_t i = 0; i < nUsers; i++){
         user_t* thisUser = malloc(sizeof(user_t));
         thisUser->id = i;

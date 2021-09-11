@@ -2,21 +2,11 @@
 
 void runTestFile(){
     game_t* game = malloc(sizeof(game_t));
-    int i, j;
+    int i;
     initGame(game, "RTEST", 6);
     randomAssignTerritories(game);
-    // for(i = 0; i < game->nTerritories; i++){
-    //     dispTerritory(game->territories[i], 2, 2);
-    // }
-    // j = i;
-    // for(i = 0; i < game->nContinents; i++){
-    //     dispContinent(game->continents[i], 2, 2);
-    // }
-    // dispUser(game->users[0], 4, 4);
     gfx_SetPalette(game->palette, game->paletteSize, 0);
-
     gainTerritory(game->users[0], game->territories[4], game->map, game->palette);
-    // dispUser(game->users[0], 4, 4);
     gfx_SetPalette(game->palette, game->paletteSize, 0);
     gfx_ScaledSprite_NoClip(game->map, 0, 0, 2, 2);
     for(i = 0; i < game->nTerritories; i++){

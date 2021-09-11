@@ -61,7 +61,7 @@ void updateContinentOwnership(continent_t** continents, uint8_t nContinents, use
         uint8_t j;
         setNullContinent(continents[i]);
         for(j = 0; j < nUsers; j++){ //For all users
-            if(checkContinent(continents[i], users[j])){
+            if(checkContinent(users[j], continents[i])){
                 setOwnedContinent(users[j], continents[i]);
                 break;
             }
@@ -79,5 +79,5 @@ void setNullContinent(continent_t* continent){
 
 int userGain(user_t* user, continent_t** continents){
     uint8_t gain = 3 + (user->nTerritories - 9) / 3;
-    uint8_t i;
+    return gain;
 }

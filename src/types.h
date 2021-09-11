@@ -232,7 +232,7 @@ void setOwnedContinent(user_t* user, continent_t* continent);
 void setNullContinent(continent_t* continent);
 
 /*====USER====*/
-void initUsers(user_t** users, uint8_t nUsers, uint8_t gameContinents, uint8_t gameTerritories);
+void initUsers(user_t** users, uint8_t nUsers, uint8_t gameTerritories);
 void freeUser(user_t* user);
 void freeAllUsers(user_t** users, uint8_t nUsers);
 int userGain(user_t* user, continent_t** continents);
