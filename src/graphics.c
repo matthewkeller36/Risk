@@ -15,7 +15,7 @@ void printTerritoryTroops(territory_t* territory){
     printY = territory->y * 2 + MAP_Y_OFFSET - 2;
     gfx_SetColor(0);
     gfx_Rectangle(printX - 2, printY - 2, numLength + 4, MINI_TEXT_HEIGHT + 4);
-    gfx_SetColor(3 + territory->owner->id);
+    gfx_SetColor(COLORS_BEFORE_PLAYERS + territory->owner->id);
     gfx_FillRectangle(printX - 1, printY - 1, numLength + 2, MINI_TEXT_HEIGHT + 2);
     gfx_SetTextXY(printX, printY);
     for(;i > 0; i--){

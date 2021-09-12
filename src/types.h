@@ -10,7 +10,10 @@
 #define MAP_HEIGHT 100
 #define MAP_X_OFFSET 0
 #define MAP_Y_OFFSET 0
+
 #define MINI_TEXT_HEIGHT 5
+
+#define COLORS_BEFORE_PLAYERS 3
 
 typedef struct user{
     uint8_t id;

@@ -22,8 +22,8 @@ void gainTerritory(user_t* user, territory_t* territory, gfx_sprite_t* map, uint
     user->userTerritories[user->nTerritories - 1] = territory->id;
     territory->owner = user;
     territory->nTroops = 1;
-    pal[map->data[territory->x + territory->y * MAP_WIDTH] * 2] = pal[6 + user->id * 2];
-    pal[map->data[territory->x + territory->y * MAP_WIDTH] * 2 + 1] = pal[7 + user->id * 2];
+    pal[map->data[territory->x + territory->y * MAP_WIDTH] * 2] = pal[(COLORS_BEFORE_PLAYERS + user->id) * 2];
+    pal[map->data[territory->x + territory->y * MAP_WIDTH] * 2 + 1] = pal[(COLORS_BEFORE_PLAYERS + user->id) * 2 + 1];
 }
 
 void loseTerritory(user_t* user, territory_t* territory){
