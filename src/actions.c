@@ -2,6 +2,13 @@
 
 /*====GAME====*/
 
+void preDraft(game_t* game){
+    updateContinentOwnership(game->continents, game->nContinents, game->users, game->nUsers);
+    
+}
+
+/*====TERRITORY====*/
+
 void addTroops(territory_t* territory, int numAdd){
     territory->nTroops += numAdd;
 }
@@ -14,8 +21,6 @@ void transferTroops(territory_t* from, territory_t* to, int numMove){
     removeTroops(from, numMove);
     addTroops(to, numMove);
 }
-
-/*====TERRITORY====*/
 
 void gainTerritory(user_t* user, territory_t* territory, gfx_sprite_t* map, uint8_t* pal){
     user->nTerritories++;
@@ -77,7 +82,9 @@ void setNullContinent(continent_t* continent){
     continent->owner = NULL;
 }
 
-int userGain(user_t* user, continent_t** continents){
+/*====USER====*/
+
+int userGain(user_t* user){
     uint8_t gain = 3 + (user->nTerritories - 9) / 3;
     return gain;
 }
