@@ -1,5 +1,13 @@
 #include "types.h"
 
+void printMap(game_t* game){
+    uint8_t i;
+    gfx_ScaledSprite_NoClip(game->map, MAP_X_OFFSET, MAP_Y_OFFSET, 2, 2);
+    for(i = 0; i < game->nTerritories; i++){
+        printTerritoryTroops(game->territories[i]);
+    }
+}
+
 void printTerritoryTroops(territory_t* territory){
     int troopsCopy = territory->nTroops, printX, printY;
     int8_t i = 0, numLength = 0;
