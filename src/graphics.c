@@ -2,6 +2,7 @@
 
 void printMap(game_t* game){
     uint8_t i;
+    gfx_FillScreen(0);
     gfx_ScaledSprite_NoClip(game->map, MAP_X_OFFSET, MAP_Y_OFFSET, 2, 2);
     for(i = 0; i < game->nTerritories; i++){
         printTerritoryTroops(game->territories[i]);
