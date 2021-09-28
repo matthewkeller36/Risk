@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <fileioc.h>
 #include <graphx.h>
+#include "key_helper.h"
 
 #define MAP_WIDTH 140
 #define MAP_HEIGHT 100
@@ -15,14 +16,15 @@
 
 #define COLORS_BEFORE_PLAYERS 3
 
-typedef struct user{
+
+typedef struct {
     uint8_t id;
     uint8_t nTerritories;
     uint8_t* userTerritories;
     uint8_t newTroops;
 }user_t;
 
-typedef struct continent{
+typedef struct {
     uint8_t id;
     char* name;
     user_t* owner;
@@ -31,7 +33,7 @@ typedef struct continent{
     uint8_t* territories;
 }continent_t;
 
-typedef struct territory{
+typedef struct {
     uint8_t id;
     char* name;
     unsigned int x;
@@ -43,7 +45,7 @@ typedef struct territory{
     uint8_t* connIndexes;
 }territory_t;
 
-typedef struct game{
+typedef struct {
     uint8_t nameLength;
     char* name;
     gfx_sprite_t* map;
@@ -87,6 +89,10 @@ bool limitRoll(territory_t* attacker, territory_t* defender, int limit);
  */
 bool blitzRoll(territory_t* attacker, territory_t* defender);
 
+/*====INPUT====*/
+
+uint8_t selectUserTerritory(game_t* game, user_t* user);
+
 /*====GAME====*/
 
 /**
@@ -113,6 +119,14 @@ void randomAssignTerritories(game_t* game);
  */
 void freeGame(game_t* game);
 
+void printMap(game_t* game);
+
+void preDraft(game_t* game);
+void preAttack(game_t* game);
+void preFortify(game_t* game);
+
+/*====TERRITORY====*/
+
 /**
  * @brief Adds troops to a given territory.
  * 
@@ -138,16 +152,6 @@ void removeTroops(territory_t* territory, int numTroops);
  */
 void transferTroops(territory_t* from, territory_t* to, int numMove);
 
-/**
- * @brief Calculates the number of troops a user should gain.
- * 
- * @param user Pointer to user to calculate gain.
- * 
- * @return Number of troops the user should gain.
- */
-int gain(user_t* user);
-
-/*====TERRITORY====*/
 /**
  * @brief Initializes \p territories array as unowned.
  * 
@@ -238,7 +242,7 @@ void setNullContinent(continent_t* continent);
 void initUsers(user_t** users, uint8_t nUsers, uint8_t gameTerritories);
 void freeUser(user_t* user);
 void freeAllUsers(user_t** users, uint8_t nUsers);
-int userGain(user_t* user, continent_t** continents);
+int userGain(user_t* user);
 
 /*====TESTING====*/
 void dispTerritory(territory_t* territory, int x, int y);
