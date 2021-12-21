@@ -7,6 +7,7 @@
 #include <keypadc.h>
 
 void kb_scan_edge();
+void init_keys();
 
 extern uint8_t kb_Falling[8];
 extern uint8_t kb_Rising[8];
