@@ -8,48 +8,59 @@
 #include <compression.h>
 
 /*====GAME====*/
-void initGame(game_t* game, char* fileName, uint8_t nUsers){
+bool initGame(game_t *game, char* fileName, uint8_t nUsers){
     ti_var_t file;
     int i;
-    ti_CloseAll();
+    
+    uint8_t pal[30] = {
+        0x00, 0x00, 0xbe, 0x02, 0xff, 0xff, //Black, light blue, white
+        0x00, 0x64, 0x80, 0x02, 0xde, 0x31, //Red, green, blue
+        0x20, 0x67, 0x19, 0x60, 0x39, 0x03, //Yellow, magenta, cyan
+        0x00, 0x7c, 0xe0, 0x23, 0x1f, 0x00, //Light variants of all the user colors in order
+        0x80, 0xff, 0x1f, 0x7c, 0xff, 0x83};
     if(!(file = ti_Open(fileName, "r"))){
-        return;
+        return false;
     }
+    dbg_sprintf(dbgout, "1 \n");
     ti_Seek(4, 0, file);
     ti_Read(&game->nameLength, sizeof(uint8_t), 1, file);
-    game->name = malloc(sizeof(char) * game->nameLength);
+    dbg_sprintf(dbgout, "%d \n", game->nameLength);
     ti_Read(game->name, sizeof(char), game->nameLength, file);
+    
     ti_Read(&(game->nTerritories), sizeof(uint8_t), 1, file);
-    game->territories = malloc(game->nTerritories * sizeof(territory_t*));
+
+    game->nUsers = nUsers;
+    initUsers(game->users, game->nUsers);
+    dbg_sprintf(dbgout, "Initializing Territories \n");
     initTerritories(game->territories, game->nTerritories, file);
-
+    dbg_sprintf(dbgout, "Initializing Territories Complete \n");
     ti_Read(&(game->nContinents), 1, 1, file);
-
-    game->continents = malloc(game->nContinents * sizeof(continent_t*));
+    dbg_sprintf(dbgout, "Initializing Continents \n");
     initContinents(game->continents, game->nContinents, file);
+    dbg_sprintf(dbgout, "Initializing Continents Complete \n");
     game->map = gfx_MallocSprite(MAP_WIDTH, MAP_HEIGHT);
     zx7_Decompress(game->map, ti_GetDataPtr(file));
-    ti_CloseAll();
-    game->paletteSize = 2 * game->nTerritories + 18;
-    game->palette = malloc(game->paletteSize);
-    memcpy(game->palette, (unsigned char[]){
-        0x00, 0x00, 0xbe, 0x02, 0xff, 0xff, 
-        0x00, 0x7c, 0xe0, 0x83, 0xde, 0x31, 
-        0xe0, 0xff, 0x1f, 0x7c, 0xff, 0x83}, 18);
-    for(i = 18; i < game->paletteSize; i++){
+    ti_Close(file);
+    game->paletteSize = 2 * game->nTerritories + 30;
+    for(i = 0; i < 30; i++){
+        game->palette[i] = pal[i];
+    }
+    for(i = 30; i < game->paletteSize; i++){
         game->palette[i] = 0x10;
         game->palette[++i] = 0x42;
     }
-    game->nUsers = nUsers;
-    game->users = malloc(game->nUsers * sizeof(user_t*));
-    initUsers(game->users, game->nUsers, game->nTerritories);
-    
+    gfx_SetPalette(game->palette, game->paletteSize, 0);
+    for(i = 0; i < game->nTerritories; i++){
+        game->territories[i].palIndex = game->map->data[game->territories[i].x + game->territories[i].y * MAP_WIDTH];
+    }
+    game->turn = 1;
+    game->playerTurn = 0;
+    return true;
 }
 
-void randomAssignTerritories(game_t* game){
-    uint8_t i;
-    uint8_t* baseArray;
-    baseArray = malloc(game->nTerritories);
+void randomAssignTerritories(game_t *game){
+    uint8_t i, j;
+    uint8_t baseArray[MAX_TERRITORIES];
     for(i = 0; i < game->nTerritories; i++){
         baseArray[i] = i;
     }
@@ -59,113 +70,60 @@ void randomAssignTerritories(game_t* game){
         temp = baseArray[i];
         baseArray[i] = baseArray[newIndex];
         baseArray[newIndex] = temp;
-        gainTerritory(game->users[i % game->nUsers], game->territories[baseArray[i]], game->map, game->palette);
+        gainTerritory(&game->users[i % game->nUsers], &game->territories[baseArray[i]]);
     }
-}
-
-void freeGame(game_t* game){
-    free(game->name);
-    free(game->map);
-    freeAllTerritories(game->territories, game->nTerritories);
-    free(game->territories);
-    free(game->palette);
-    freeAllContinents(game->continents, game->nContinents);
-    free(game->continents);
-    freeAllUsers(game->users, game->nUsers);
-    // free(game->users);
-    free(game);
+    for(i = 0; i < game->nUsers; i++){
+        for(j = 0; j < 50 - 5 * game->nUsers - game->users[i].nTerritories; j++){
+            addTroops(&game->territories[game->users[i].userTerritories[randInt(0, game->users[i].nTerritories - 1)]], 1);
+        }
+    }
 }
 
 /*====Territory====*/
-void initTerritories(territory_t** territories, uint8_t nTerritories, ti_var_t file){
+void initTerritories(territory_t *territories, uint8_t nTerritories, ti_var_t file){
     int id;
 
     for(id = 0; id < nTerritories; id++){
-        territory_t* thisTerritory = malloc(sizeof(territory_t));
         uint8_t nameLength = 0;
-        thisTerritory->id = id;
+        territories[id].id = id;
         ti_Read(&nameLength, sizeof(nameLength), 1, file);
-        thisTerritory->name = malloc(nameLength);
-        ti_Read(thisTerritory->name, sizeof(char), nameLength, file);
-        thisTerritory->x = thisTerritory->y = 0;
-        ti_Read(&(thisTerritory->x), 1, 1, file);
-        ti_Read(&(thisTerritory->y), 1, 1, file);
-        thisTerritory->owner = NULL;
-        ti_Read(&(thisTerritory->continent), sizeof(uint8_t), 1, file);
-        thisTerritory->nTroops = 1;
-        ti_Read(&(thisTerritory->nConnections), sizeof(uint8_t), 1, file);
-        thisTerritory->connIndexes = malloc(thisTerritory->nConnections);
-        ti_Read(thisTerritory->connIndexes, sizeof(uint8_t), thisTerritory->nConnections, file);
-        territories[id] = thisTerritory;
-    }
-    
-}
-
-void freeTerritory(territory_t* territory){
-    free(territory->name);
-    free(territory->connIndexes);
-    free(territory);
-}
-
-void freeAllTerritories(territory_t** territories, uint8_t nTerritories){
-    for(uint8_t i = 0; i < nTerritories; i++){
-        freeTerritory(territories[i]);
+        ti_Read(territories[id].name, sizeof(char), nameLength, file);
+        territories[id].x = territories[id].y = 0;
+        ti_Read(&(territories[id].x), 1, 1, file);
+        ti_Read(&(territories[id].y), 1, 1, file);
+        territories[id].owner = NULL;
+        territories[id].nTroops = 1;
+        ti_Read(&(territories[id].continent), sizeof(uint8_t), 1, file);
+        ti_Read(&(territories[id].nConnections), sizeof(uint8_t), 1, file);
+        ti_Read(territories[id].connIndexes, sizeof(uint8_t), territories[id].nConnections, file);
     }
 }
 
 /*====CONTINENT====*/
-void initContinents(continent_t** continents, uint8_t nContinents, ti_var_t file){
+bool initContinents(continent_t *continents, uint8_t nContinents, ti_var_t file){
     int id;
     for(id = 0; id < nContinents; id++){
-        continent_t* thisContinent = malloc(sizeof(continent_t));
-        
         uint8_t nameLength = 0;
-        thisContinent->id = id;
+        continents[id].id = id;
         ti_Read(&nameLength, sizeof(nameLength), 1, file);
-        thisContinent->name = malloc(nameLength * sizeof(uint8_t));
-        ti_Read(thisContinent->name, sizeof(char), nameLength, file);
-        thisContinent->owner = NULL;
-        ti_Read(&(thisContinent->bonus), sizeof(uint8_t), 1, file);
-        ti_Read(&(thisContinent->nTerritories), sizeof(uint8_t), 1, file);
-        thisContinent->territories = malloc(thisContinent->nTerritories);
-        ti_Read(thisContinent->territories, sizeof(uint8_t), thisContinent->nTerritories, file);
-        continents[id] = thisContinent;
+        ti_Read(continents[id].name, sizeof(char), nameLength, file);
+        continents[id].owner = NULL;
+        ti_Read(&(continents[id].bonus), sizeof(uint8_t), 1, file);
+        ti_Read(&(continents[id].nTerritories), sizeof(uint8_t), 1, file);
+        ti_Read(continents[id].territories, sizeof(uint8_t), continents[id].nTerritories, file);
     }
-}
-
-void freeContinent(continent_t* continent){
-    free(continent->name);
-    free(continent->territories);
-    free(continent);
-}
-
-void freeAllContinents(continent_t** continents, uint8_t nContinents){
-    for(uint8_t i = 0; i < nContinents; i++){
-        freeContinent(continents[i]);
-    }
+    return true;
 }
 
 /*====USER====*/
-void initUsers(user_t** user, uint8_t nUsers, uint8_t gameTerritories){
+bool initUsers(user_t *users, uint8_t nUsers){
     for(uint8_t i = 0; i < nUsers; i++){
-        user_t* thisUser = malloc(sizeof(user_t));
-        thisUser->id = i;
-        thisUser->nTerritories = 0;
-        thisUser->userTerritories = malloc(gameTerritories);
-        thisUser->newTroops = 0;
-        user[i] = thisUser;
+        users[i].id = i;
+        users[i].nTerritories = 0;
+        users[i].newTroops = 0;
+        for(uint8_t j = 0; j < MAX_CARDS; j++) users[i].cards[j] = 0;
     }
-}
-
-void freeUser(user_t* user){
-    free(user->userTerritories);
-    free(user);
-}
-
-void freeAllUsers(user_t** users, uint8_t nUsers){
-    for(uint8_t i = 0; i < nUsers; i++){
-        freeUser(users[i]);
-    }
+    return true;
 }
 
 /*====OTHER====*/
@@ -202,4 +160,5 @@ void initGraphics(){
         gfx_SetCharData(i + 1, &miniFont[i * 8]);
     }
     gfx_SetFontSpacing(miniFontSpacing);
+    gfx_SetDrawBuffer();
 }

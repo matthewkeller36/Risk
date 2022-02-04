@@ -1,6 +1,16 @@
 #include "graphics.h"
+#include <string.h>
 
-void printAll(game_t* game){
+int fpsCounter(){
+    
+    timer_Disable(1);
+    float fps = (float)(32678 / timer_GetSafe(1, TIMER_UP));
+    timer_Set(1, 0);
+    timer_Enable(1, TIMER_32K, TIMER_0INT, TIMER_UP);
+    return (int)fps;
+}
+
+void printAll(game_t *game){
     gfx_FillScreen(WATER_INDEX);
     printMap(game);
     printTopBanner(game);
@@ -9,7 +19,7 @@ void printAll(game_t* game){
     printRightBanner(game);
 }
 
-void printMap(game_t* game){
+void printMap(game_t *game){
     uint8_t i;
     gfx_ScaledSprite_NoClip(game->map, MAP_X_OFFSET, MAP_Y_OFFSET, 2, 2);
     for(i = 0; i < game->nTerritories; i++){
@@ -40,7 +50,7 @@ void printTerritoryTroops(territory_t territory){
     }
 }
 
-void printTopBanner(game_t* game){
+void printTopBanner(game_t *game){
     gfx_SetColor(BLACK_INDEX);
     gfx_PrintStringXY("Turn: ", 2, 1);
     gfx_PrintInt(game->turn, 1);
@@ -49,7 +59,7 @@ void printTopBanner(game_t* game){
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET - 1, LCD_WIDTH);
 }
 
-void printLeftBanner(game_t* game){
+void printLeftBanner(game_t *game){
     uint8_t i;
     gfx_SetColor(BLACK_INDEX);
     gfx_VertLine_NoClip(MAP_X_OFFSET - 1, MAP_Y_OFFSET, MAP_HEIGHT * 2);
@@ -62,15 +72,37 @@ void printLeftBanner(game_t* game){
     }
 }
 
-void printBottomBanner(game_t* game){
+void printBottomBanner(game_t *game){
     gfx_SetColor(BLACK_INDEX);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2, LCD_WIDTH);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2 + 11, LCD_WIDTH);
-    
-    gfx_PrintStringXY("Other text", 20, LCD_HEIGHT - 10);
+    gfx_PrintStringXY("FPS: ", 20, LCD_HEIGHT - 10);
+    gfx_PrintInt(fpsCounter(), 2);
 }
 
-void printRightBanner(game_t* game){
+void printRightBanner(game_t *game){
     gfx_SetColor(BLACK_INDEX);
     gfx_VertLine_NoClip(MAP_X_OFFSET + MAP_WIDTH * 2, MAP_Y_OFFSET, MAP_HEIGHT * 2);
+}
+
+void revstr(char *str){
+    uint8_t length = strlen(str);
+    for(uint8_t i = 0; i < length / 2; i++){
+        char temp = str[i];
+        str[i] = str[length - i - 1];
+        str[length - i - 1] = temp;
+    }
+}
+
+void itoa_custom(char *buffer, uint8_t num){
+    uint8_t i = 0;
+    do{
+        buffer[i++] = (num % 10) + '0';
+        num /= 10;
+    }while(num);
+    revstr(buffer);
+}
+
+void printCentered(char *str, int y){
+    gfx_PrintStringXY(str, (LCD_WIDTH - gfx_GetStringWidth(str)) / 2, y);
 }

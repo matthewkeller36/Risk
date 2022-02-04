@@ -1,22 +1,16 @@
-#include "types.h"
+#include "input.h"
+#include <debug.h>
 
-void runTestFile(){
-    game_t* game = malloc(sizeof(game_t));
-    int i;
+void runTestFile(game_t *game){
     initGame(game, "RTEST", 6);
+    dbg_sprintf(dbgout, "1 \n");
     randomAssignTerritories(game);
-    gfx_SetPalette(game->palette, game->paletteSize, 0);
-    gainTerritory(game->users[0], game->territories[4], game->map, game->palette);
-    gfx_SetPalette(game->palette, game->paletteSize, 0);
-    gfx_ScaledSprite_NoClip(game->map, 0, 0, 2, 2);
-    for(i = 0; i < game->nTerritories; i++){
-        printTerritoryTroops(game->territories[i]);
-    }
-    while(!(os_GetCSC()));
-    freeGame(game);
+    dbg_sprintf(dbgout, "2 \n");
+    draft(game);
+    
 }
 
-void dispTerritory(territory_t* territory, int x, int y){
+void dispTerritory(territory_t *territory, int x, int y){
     int i;
     gfx_FillScreen(255);
     gfx_PrintStringXY("Name: ", x, y);
@@ -43,7 +37,7 @@ void dispTerritory(territory_t* territory, int x, int y){
     while(!os_GetCSC());
 }
 
-void dispContinent(continent_t* continent, int x, int y){
+void dispContinent(continent_t *continent, int x, int y){
     int i;
     gfx_FillScreen(255);
     gfx_PrintStringXY("Name: ", x, y);
@@ -66,7 +60,7 @@ void dispContinent(continent_t* continent, int x, int y){
     while(!(os_GetCSC()));
 }
 
-void dispUser(user_t* user, int x, int y){
+void dispUser(user_t *user, int x, int y){
     int i;
     gfx_FillScreen(255);
     gfx_PrintStringXY("ID: ", x, y);

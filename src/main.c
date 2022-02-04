@@ -23,14 +23,15 @@
 #include <string.h>
 
 #include "types.h"
+#include "graphics.h"
 
 int main(void)
 {
-    
+    static game_t game;
     srand(rtc_Time());
     initGraphics();
-    gfx_Begin();
-    runTestFile();
+    timer_Enable(1, TIMER_32K, TIMER_0INT, TIMER_UP);
+    runTestFile(&game);
     gfx_End();
     
     return 0;

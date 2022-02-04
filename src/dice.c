@@ -4,7 +4,7 @@
 
 /*Will return true if attacker won, false if defender won*/
 
-bool singleAttack(territory_t* attack, territory_t* def){
+bool singleAttack(territory_t *attack, territory_t *def){
     uint8_t attackRolls[3] = {0, 0, 0};
     uint8_t defendRolls[2] = {0, 0};
     uint8_t temp;
@@ -43,13 +43,13 @@ bool singleAttack(territory_t* attack, territory_t* def){
     
 }
 
-bool limitRoll(territory_t* attack, territory_t* def, int limit){
+bool limitRoll(territory_t *attack, territory_t *def, unsigned int limit){
     while(attack->nTroops > limit && def->nTroops > 0){
         singleAttack(attack, def);
     }
     return def->nTroops < 1;
 }
 
-bool blitzRoll(territory_t* attack, territory_t* def){
+bool blitzRoll(territory_t *attack, territory_t *def){
     return limitRoll(attack, def, 1);
 }
