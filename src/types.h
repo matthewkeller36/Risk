@@ -37,11 +37,11 @@ typedef struct {
 
 typedef struct {
     uint8_t id;
-    char name[20];
+    char *name;
     user_t *owner;
     uint8_t bonus;
     uint8_t nTerritories;
-    uint8_t territories[MAX_TERR_IN_CONTINENT];
+    uint8_t *territories;
 }continent_t;
 
 typedef struct { //Progressive, pass-through, random assign, 
@@ -50,20 +50,20 @@ typedef struct { //Progressive, pass-through, random assign,
 
 typedef struct {
     uint8_t id;
-    char name[20];
+    char *name;
     unsigned int x;
     unsigned int y;
     uint8_t continent;
     uint8_t nConnections;
     unsigned int nTroops;
-    uint8_t connIndexes[MAX_CONNS];
+    uint8_t *connIndexes;
     uint8_t palIndex;
     user_t *owner;
 }territory_t;
 
 typedef struct {
     uint8_t nameLength;
-    char name[20];
+    char *name;
     gfx_sprite_t *map;
     uint8_t nTerritories;
     territory_t territories[MAX_TERRITORIES];
@@ -89,13 +89,13 @@ void preFortify(game_t *game);
 void addTroops(territory_t *territory, int numTroops);
 void removeTroops(territory_t *territory, int numTroops);
 void transferTroops(territory_t *from, territory_t *to, int numMove);
-void initTerritories(territory_t *territories, uint8_t mTerritories, ti_var_t file);
+void * initTerritories(territory_t *territories, uint8_t mTerritories, void *file_ptr);
 void gainTerritory(user_t *user, territory_t *territory);
 void loseTerritory(user_t *user, territory_t *territory);
 void printTerritoryTroops(territory_t territory);
 
 /*====CONTINENT====*/
-bool initContinents(continent_t *continents, uint8_t nContinents, ti_var_t file);
+void * initContinents(continent_t *continents, uint8_t nContinents, void *file_ptr);
 bool checkContinent(user_t user, continent_t continent);
 void updateContinentOwnership(continent_t *continents, uint8_t nContinents, user_t *users, uint8_t nUsers);
 void setOwnedContinent(user_t *user, continent_t *continent);

@@ -3,11 +3,8 @@
 
 void runTestFile(game_t *game){
     initGame(game, "RTEST", 6);
-    dbg_sprintf(dbgout, "1 \n");
     randomAssignTerritories(game);
-    dbg_sprintf(dbgout, "2 \n");
     draft(game);
-    
 }
 
 void dispTerritory(territory_t *territory, int x, int y){
@@ -34,6 +31,7 @@ void dispTerritory(territory_t *territory, int x, int y){
         gfx_PrintUInt(territory->connIndexes[i], 2);
         gfx_PrintChar(' ');
     }
+    gfx_SwapDraw();
     while(!os_GetCSC());
 }
 
@@ -57,6 +55,7 @@ void dispContinent(continent_t *continent, int x, int y){
         gfx_PrintUInt(continent->territories[i], 2);
         gfx_PrintChar(' ');
     }
+    gfx_SwapDraw();
     while(!(os_GetCSC()));
 }
 
@@ -77,5 +76,6 @@ void dispUser(user_t *user, int x, int y){
     gfx_PrintStringXY("Continents: ", x, y + 48);
     gfx_PrintStringXY("New Troops: ", x, y + 60);
     gfx_PrintUInt(user->newTroops, 2);
+    gfx_SwapDraw();
     while(!(os_GetCSC()));
 }

@@ -1,5 +1,4 @@
 #include <string.h>
-
 #include <tice.h>
 #include <fileioc.h>
 #include <graphx.h>
@@ -11,6 +10,7 @@
 bool initGame(game_t *game, char* fileName, uint8_t nUsers){
     ti_var_t file;
     int i;
+    void *file_ptr;
     
     uint8_t pal[30] = {
         0x00, 0x00, 0xbe, 0x02, 0xff, 0xff, //Black, light blue, white
@@ -21,25 +21,28 @@ bool initGame(game_t *game, char* fileName, uint8_t nUsers){
     if(!(file = ti_Open(fileName, "r"))){
         return false;
     }
-    dbg_sprintf(dbgout, "1 \n");
-    ti_Seek(4, 0, file);
-    ti_Read(&game->nameLength, sizeof(uint8_t), 1, file);
-    dbg_sprintf(dbgout, "%d \n", game->nameLength);
-    ti_Read(game->name, sizeof(char), game->nameLength, file);
-    
-    ti_Read(&(game->nTerritories), sizeof(uint8_t), 1, file);
+
+    file_ptr = ti_GetDataPtr(file) + 4;         //Move 4 
+    game->nameLength = *(uint8_t *)file_ptr;
+    file_ptr++;
+    game->name = (char *)file_ptr;
+    file_ptr += game->nameLength;
+    // ti_Read(&(game->nTerritories), sizeof(uint8_t), 1, file);
+    game->nTerritories = *(uint8_t *) file_ptr;
+    file_ptr++;
 
     game->nUsers = nUsers;
     initUsers(game->users, game->nUsers);
     dbg_sprintf(dbgout, "Initializing Territories \n");
-    initTerritories(game->territories, game->nTerritories, file);
+    file_ptr = initTerritories(game->territories, game->nTerritories, file_ptr);
     dbg_sprintf(dbgout, "Initializing Territories Complete \n");
-    ti_Read(&(game->nContinents), 1, 1, file);
+    game->nContinents = *(uint8_t *) file_ptr;
+    file_ptr++;
     dbg_sprintf(dbgout, "Initializing Continents \n");
-    initContinents(game->continents, game->nContinents, file);
+    file_ptr = initContinents(game->continents, game->nContinents, file_ptr);
     dbg_sprintf(dbgout, "Initializing Continents Complete \n");
     game->map = gfx_MallocSprite(MAP_WIDTH, MAP_HEIGHT);
-    zx7_Decompress(game->map, ti_GetDataPtr(file));
+    zx7_Decompress(game->map, file_ptr);
     ti_Close(file);
     game->paletteSize = 2 * game->nTerritories + 30;
     for(i = 0; i < 30; i++){
@@ -80,39 +83,52 @@ void randomAssignTerritories(game_t *game){
 }
 
 /*====Territory====*/
-void initTerritories(territory_t *territories, uint8_t nTerritories, ti_var_t file){
+void * initTerritories(territory_t *territories, uint8_t nTerritories, void *file_ptr){
     int id;
 
     for(id = 0; id < nTerritories; id++){
         uint8_t nameLength = 0;
         territories[id].id = id;
-        ti_Read(&nameLength, sizeof(nameLength), 1, file);
-        ti_Read(territories[id].name, sizeof(char), nameLength, file);
-        territories[id].x = territories[id].y = 0;
-        ti_Read(&(territories[id].x), 1, 1, file);
-        ti_Read(&(territories[id].y), 1, 1, file);
+        nameLength = *(uint8_t *) file_ptr;
+        file_ptr++;
+        territories[id].name = (char *) file_ptr;
+        file_ptr += nameLength;
+        territories[id].x = *(uint8_t *) file_ptr;
+        file_ptr += 1;
+        territories[id].y = *(uint8_t *) file_ptr;
+        file_ptr += 1;
         territories[id].owner = NULL;
         territories[id].nTroops = 1;
-        ti_Read(&(territories[id].continent), sizeof(uint8_t), 1, file);
-        ti_Read(&(territories[id].nConnections), sizeof(uint8_t), 1, file);
-        ti_Read(territories[id].connIndexes, sizeof(uint8_t), territories[id].nConnections, file);
+        territories[id].continent = *(uint8_t *)file_ptr;
+        file_ptr++;
+        territories[id].nConnections = *(uint8_t *) file_ptr;
+        file_ptr++;
+        territories[id].connIndexes = (uint8_t *) file_ptr;
+        file_ptr += territories[id].nConnections;
+        dbg_sprintf(dbgout, "Name: %s X: %d Y: %d Continent: %d nConnections: %d\n", territories[id].name, territories[id].x, territories[id].y, territories[id].continent, territories[id].nConnections);
     }
+    return file_ptr;
 }
 
 /*====CONTINENT====*/
-bool initContinents(continent_t *continents, uint8_t nContinents, ti_var_t file){
+void * initContinents(continent_t *continents, uint8_t nContinents, void *file_ptr){
     int id;
     for(id = 0; id < nContinents; id++){
         uint8_t nameLength = 0;
         continents[id].id = id;
-        ti_Read(&nameLength, sizeof(nameLength), 1, file);
-        ti_Read(continents[id].name, sizeof(char), nameLength, file);
+        nameLength = *(uint8_t *) file_ptr;
+        file_ptr++;
+        continents[id].name = (char *) file_ptr;
+        file_ptr += nameLength;
         continents[id].owner = NULL;
-        ti_Read(&(continents[id].bonus), sizeof(uint8_t), 1, file);
-        ti_Read(&(continents[id].nTerritories), sizeof(uint8_t), 1, file);
-        ti_Read(continents[id].territories, sizeof(uint8_t), continents[id].nTerritories, file);
+        continents[id].bonus = *(uint8_t *) file_ptr;
+        file_ptr++;
+        continents[id].nTerritories = *(uint8_t *) file_ptr;
+        file_ptr++;
+        continents[id].territories = (uint8_t * ) file_ptr;
+        file_ptr += continents[id].nTerritories;
     }
-    return true;
+    return file_ptr;
 }
 
 /*====USER====*/
