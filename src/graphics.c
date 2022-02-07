@@ -1,22 +1,29 @@
 #include "graphics.h"
 #include <string.h>
 
-int fpsCounter(){
+int fpsCounterLimit(int target){
+    int fps;
+    gfx_SetColor(WATER_INDEX);
+    gfx_FillRectangle_NoClip(0, LCD_HEIGHT - 10, 64, 10);
+    gfx_PrintStringXY("FPS: ", 2, LCD_HEIGHT - 10);
     
+    while((fps = (32678 / timer_GetSafe(1, TIMER_UP))) > target);
     timer_Disable(1);
-    float fps = (float)(32678 / timer_GetSafe(1, TIMER_UP));
     timer_Set(1, 0);
     timer_Enable(1, TIMER_32K, TIMER_0INT, TIMER_UP);
-    return (int)fps;
+    gfx_PrintInt(fps, 2);
+    return fps;
 }
 
 void printAll(game_t *game){
-    gfx_FillScreen(WATER_INDEX);
-    printMap(game);
-    printTopBanner(game);
-    printLeftBanner(game);
-    printBottomBanner(game);
-    printRightBanner(game);
+
+    if(game->redraws & REDRAW_MAP) printMap(game);
+    if(game->redraws & REDRAW_TOP) printTopBanner(game);
+    if(game->redraws & REDRAW_LEFT) printLeftBanner(game);
+    if(game->redraws & REDRAW_BOTTOM) printBottomBanner(game);
+    if(game->redraws & REDRAW_RIGHT) printRightBanner(game);
+    fpsCounterLimit(60);
+    gfx_BlitBuffer();
 }
 
 void printMap(game_t *game){
@@ -25,6 +32,7 @@ void printMap(game_t *game){
     for(i = 0; i < game->nTerritories; i++){
         printTerritoryTroops(game->territories[i]);
     }
+    game->redraws ^= REDRAW_MAP;
 }
 
 void printTerritoryTroops(territory_t territory){
@@ -57,6 +65,7 @@ void printTopBanner(game_t *game){
     gfx_PrintStringXY(game->name, (LCD_WIDTH - gfx_GetStringWidth(game->name)) / 2, 1);
     gfx_PrintStringXY("Fortify", LCD_WIDTH - gfx_GetStringWidth("Fortify") - 2, 1);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET - 1, LCD_WIDTH);
+    game->redraws ^= REDRAW_TOP;
 }
 
 void printLeftBanner(game_t *game){
@@ -70,19 +79,24 @@ void printLeftBanner(game_t *game){
         else gfx_SetColor(BLACK_INDEX);
         gfx_Circle_NoClip(MAP_X_OFFSET - 11, MAP_Y_OFFSET + 10 * i + 7, 4);
     }
+    game->redraws ^= REDRAW_LEFT;
 }
 
 void printBottomBanner(game_t *game){
+    gfx_SetColor(WATER_INDEX);
+    gfx_FillRectangle_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2, LCD_WIDTH, LCD_HEIGHT - (MAP_Y_OFFSET + MAP_HEIGHT * 2));
     gfx_SetColor(BLACK_INDEX);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2, LCD_WIDTH);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2 + 11, LCD_WIDTH);
-    gfx_PrintStringXY("FPS: ", 20, LCD_HEIGHT - 10);
-    gfx_PrintInt(fpsCounter(), 2);
+    game->redraws ^= REDRAW_BOTTOM;
 }
 
 void printRightBanner(game_t *game){
+    gfx_SetColor(WATER_INDEX);
+    gfx_FillRectangle_NoClip(MAP_X_OFFSET + MAP_WIDTH * 2, MAP_Y_OFFSET, LCD_WIDTH - (MAP_X_OFFSET + MAP_WIDTH * 2), MAP_HEIGHT * 2);
     gfx_SetColor(BLACK_INDEX);
     gfx_VertLine_NoClip(MAP_X_OFFSET + MAP_WIDTH * 2, MAP_Y_OFFSET, MAP_HEIGHT * 2);
+    game->redraws ^= REDRAW_RIGHT;
 }
 
 void revstr(char *str){
