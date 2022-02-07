@@ -58,6 +58,7 @@ bool initGame(game_t *game, char* fileName, uint8_t nUsers){
     }
     game->turn = 1;
     game->playerTurn = 0;
+    game->redraws = REDRAW_ALL;
     return true;
 }
 
@@ -177,4 +178,5 @@ void initGraphics(){
     }
     gfx_SetFontSpacing(miniFontSpacing);
     gfx_SetDrawBuffer();
+    gfx_FillScreen(WATER_INDEX);
 }
