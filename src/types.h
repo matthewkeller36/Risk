@@ -26,6 +26,14 @@
 #define WATER_INDEX 1
 #define WHITE_INDEX 2
 
+#define REDRAW_MAP (1)
+#define REDRAW_RIGHT (1 << 1)
+#define REDRAW_TOP (1 << 2)
+#define REDRAW_LEFT (1 << 3)
+#define REDRAW_BOTTOM (1 << 4)
+#define REDRAW_ALL 0x1F
+
+
 
 typedef struct {
     uint8_t id;
@@ -75,6 +83,7 @@ typedef struct {
     uint8_t paletteSize;
     int turn;
     uint8_t playerTurn;
+    uint8_t redraws;
 }game_t;
 
 /*====GAME====*/
