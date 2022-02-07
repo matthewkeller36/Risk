@@ -1,16 +1,9 @@
 #include "types.h"
 #include "input.h"
 #include "graphics.h"
-
 #include <string.h>
 
 /*====GAME====*/
-
-void resetTimer(){
-    timer_Control = TIMER1_DISABLE;
-    timer_1_Counter = 32768 / 4;
-    timer_1_ReloadValue = 32768 / 4;
-}
 
 void draft(game_t *game){
     int gain;
@@ -20,14 +13,15 @@ void draft(game_t *game){
     while(gain > 0){
         char dispText[20] = "Remaining: ", buf[5] = {0};
         printAll(game);
-        itoa_custom(buf, gain);
-        strcat(dispText, buf);
-        printCentered(dispText, MAP_Y_OFFSET + 2 * MAP_HEIGHT + 2);
-        gfx_BlitBuffer();
-        
-        if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory) == -1) continue;
-        addTroops(&game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]], 1);
-        gain--;
+        // itoa_custom(buf, gain);
+        // strcat(dispText, buf);
+        // printCentered(dispText, MAP_Y_OFFSET + 2 * MAP_HEIGHT + 2);
+        // gfx_BlitBuffer();
+        if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory)){
+            addTroops(&game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]], 1);
+            gain--;
+            game->redraws ^= REDRAW_MAP | REDRAW_BOTTOM;
+        }
     }
 }
 
@@ -86,12 +80,12 @@ bool checkContinent(user_t user, continent_t continent){
 
 void updateContinentOwnership(continent_t *continents, uint8_t nContinents, user_t *users, uint8_t nUsers){
     uint8_t i;
-    for(i = 0; i < nContinents; i++){ //For all continents
+    for(i = 0; i < nContinents; i++){
         uint8_t j;
-        setNullContinent(&continents[i]);
+        continents[i].owner = NULL;
         for(j = 0; j < nUsers; j++){ //For all users
             if(checkContinent(users[j], continents[i])){
-                setOwnedContinent(&users[j], &continents[i]);
+                continents[i].owner = &users[j];
                 break;
             }
         }
