@@ -1,4 +1,5 @@
 #include "input.h"
+#include "graphics.h"
 
 int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uint8_t nTerritories, int8_t *choice){
     uint8_t index;
@@ -13,6 +14,12 @@ int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uin
     if(kb_Rising[1] & kb_2nd){
         gfx_palette[index] = gfx_palette[(COLORS_BEFORE_PLAYERS + territories[territoryList[*choice]].owner->id)];
         return 1;
+    }
+    if(kb_Rising[6] & kb_Clear){
+        if(exitConfirm()){
+            gfx_End();
+            exit(0);
+        }
     }
     
     return 0;
