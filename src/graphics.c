@@ -133,15 +133,15 @@ uint8_t exitConfirm(){
     printCentered("Your game will be saved", (LCD_HEIGHT) / 2);
     printCentered("No        Yes", (LCD_HEIGHT + 40) / 2);
     do{
+        gfx_SetColor(WATER_INDEX);
+        gfx_Rectangle_NoClip((LCD_WIDTH - 78 + choice * 88) / 2, (LCD_HEIGHT + 40) / 2 - 2, 28, 12);
         kb_scan_edge();
         if(kb_Rising[7]){
-            gfx_SetColor(BLACK_INDEX);
-            gfx_Rectangle_NoClip(120 + choice * 30, (LCD_HEIGHT + 40) / 2 - 2, 20, 12);
             choice = (choice + 1) % 2;
-            gfx_SetColor(WHITE_INDEX);
-            gfx_Rectangle_NoClip(120 + choice * 30, (LCD_HEIGHT + 40) / 2 - 2, 20, 12);
-            gfx_BlitBuffer();
         }
-    }while(!kb_Rising[1] & kb_2nd);
+        gfx_SetColor(BLACK_INDEX);
+        gfx_Rectangle_NoClip((LCD_WIDTH - 78 + choice * 88) / 2, (LCD_HEIGHT + 40) / 2 - 2, 28, 12);
+        gfx_BlitBuffer();
+    }while(!(kb_Rising[1] & kb_2nd));
     return choice;
 }
