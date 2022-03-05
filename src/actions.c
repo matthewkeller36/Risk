@@ -12,15 +12,23 @@ void draft(game_t *game){
     gain = userGain(&game->users[game->playerTurn]);
     while(gain > 0){
         char dispText[20] = "Remaining: ", buf[5] = {0};
-        printAll(game);
-        // itoa_custom(buf, gain);
-        // strcat(dispText, buf);
-        // printCentered(dispText, MAP_Y_OFFSET + 2 * MAP_HEIGHT + 2);
-        // gfx_BlitBuffer();
+        itoa_custom(buf, gain);
+        strcat(dispText, buf);
+        printAll(game, dispText);
         if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory)){
             addTroops(&game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]], 1);
             gain--;
             game->redraws ^= REDRAW_MAP | REDRAW_BOTTOM;
+        }
+    }
+    while(!(kb_Rising[6] & kb_Enter)){
+        kb_scan_edge();
+        printAll(game, "Press [Enter] to continue");
+        if(kb_Rising[6] & kb_Clear){
+            if(exitConfirm()){
+                gfx_End();
+                exit(0);
+            }
         }
     }
 }
