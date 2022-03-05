@@ -15,14 +15,14 @@ int fpsCounterLimit(int target){
     return fps;
 }
 
-void printAll(game_t *game){
+void printAll(game_t *game, char *dispText){
 
     if(game->redraws & REDRAW_MAP) printMap(game);
     if(game->redraws & REDRAW_TOP) printTopBanner(game);
     if(game->redraws & REDRAW_LEFT) printLeftBanner(game);
-    if(game->redraws & REDRAW_BOTTOM) printBottomBanner(game);
+    if(game->redraws & REDRAW_BOTTOM) printBottomBanner(game, dispText);
     if(game->redraws & REDRAW_RIGHT) printRightBanner(game);
-    fpsCounterLimit(60);
+    fpsCounterLimit(240);
     gfx_BlitBuffer();
 }
 
@@ -82,12 +82,13 @@ void printLeftBanner(game_t *game){
     game->redraws ^= REDRAW_LEFT;
 }
 
-void printBottomBanner(game_t *game){
+void printBottomBanner(game_t *game, char *dispText){
     gfx_SetColor(WATER_INDEX);
     gfx_FillRectangle_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2, LCD_WIDTH, LCD_HEIGHT - (MAP_Y_OFFSET + MAP_HEIGHT * 2));
     gfx_SetColor(BLACK_INDEX);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2, LCD_WIDTH);
     gfx_HorizLine_NoClip(0, MAP_Y_OFFSET + MAP_HEIGHT * 2 + 11, LCD_WIDTH);
+    printCentered(dispText, MAP_Y_OFFSET + 2 * MAP_HEIGHT + 2);
     game->redraws ^= REDRAW_BOTTOM;
 }
 
@@ -119,4 +120,28 @@ void itoa_custom(char *buffer, uint8_t num){
 
 void printCentered(char *str, int y){
     gfx_PrintStringXY(str, (LCD_WIDTH - gfx_GetStringWidth(str)) / 2, y);
+}
+
+uint8_t exitConfirm(){
+    uint8_t choice = 0;
+    gfx_SetColor(WATER_INDEX);
+    gfx_FillRectangle_NoClip((LCD_WIDTH - 160) / 2, (LCD_HEIGHT - 64) / 2, 160, 65);
+    gfx_SetColor(BLACK_INDEX);
+    gfx_Rectangle_NoClip((LCD_WIDTH - 162) / 2, (LCD_HEIGHT - 66) / 2, 161, 66);
+    printCentered("Are you sure you", (LCD_HEIGHT - 60) / 2);
+    printCentered("would like to quit?", (LCD_HEIGHT - 40) / 2);
+    printCentered("Your game will be saved", (LCD_HEIGHT) / 2);
+    printCentered("No        Yes", (LCD_HEIGHT + 40) / 2);
+    do{
+        kb_scan_edge();
+        if(kb_Rising[7]){
+            gfx_SetColor(BLACK_INDEX);
+            gfx_Rectangle_NoClip(120 + choice * 30, (LCD_HEIGHT + 40) / 2 - 2, 20, 12);
+            choice = (choice + 1) % 2;
+            gfx_SetColor(WHITE_INDEX);
+            gfx_Rectangle_NoClip(120 + choice * 30, (LCD_HEIGHT + 40) / 2 - 2, 20, 12);
+            gfx_BlitBuffer();
+        }
+    }while(!kb_Rising[1] & kb_2nd);
+    return choice;
 }
