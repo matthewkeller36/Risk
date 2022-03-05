@@ -27,7 +27,6 @@ bool initGame(game_t *game, char* fileName, uint8_t nUsers){
     file_ptr++;
     game->name = (char *)file_ptr;
     file_ptr += game->nameLength;
-    // ti_Read(&(game->nTerritories), sizeof(uint8_t), 1, file);
     game->nTerritories = *(uint8_t *) file_ptr;
     file_ptr++;
 
@@ -106,7 +105,6 @@ void * initTerritories(territory_t *territories, uint8_t nTerritories, void *fil
         file_ptr++;
         territories[id].connIndexes = (uint8_t *) file_ptr;
         file_ptr += territories[id].nConnections;
-        dbg_sprintf(dbgout, "Name: %s X: %d Y: %d Continent: %d nConnections: %d\n", territories[id].name, territories[id].x, territories[id].y, territories[id].continent, territories[id].nConnections);
     }
     return file_ptr;
 }
