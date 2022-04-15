@@ -78,7 +78,7 @@ void randomAssignTerritories(game_t *game){
     }
     for(i = 0; i < game->nUsers; i++){
         for(j = 0; j < 50 - 5 * game->nUsers - game->users[i].nTerritories; j++){
-            addTroops(&game->territories[game->users[i].userTerritories[randInt(0, game->users[i].nTerritories - 1)]], 1);
+            game->territories[game->users[i].userTerritories[randInt(0, game->users[i].nTerritories - 1)]].nTroops++;
         }
     }
 }

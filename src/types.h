@@ -97,8 +97,6 @@ void attack(game_t *game);
 void preFortify(game_t *game);
 
 /*====TERRITORY====*/
-void addTroops(territory_t *territory, int numTroops);
-void removeTroops(territory_t *territory, int numTroops);
 void transferTroops(territory_t *from, territory_t *to, int numMove);
 void * initTerritories(territory_t *territories, uint8_t mTerritories, void *file_ptr);
 void gainTerritory(user_t *user, territory_t *territory);
