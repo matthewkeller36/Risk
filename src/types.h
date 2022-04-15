@@ -14,10 +14,11 @@
 #define MAX_USERS 6
 #define MAX_CARDS 9
 
-#define MAP_WIDTH 140
-#define MAP_HEIGHT 100
-#define MAP_X_OFFSET (LCD_WIDTH / 2) - MAP_WIDTH
-#define MAP_Y_OFFSET LCD_HEIGHT / 2 - MAP_HEIGHT - 9
+#define MAP_WIDTH 255
+#define MAP_HEIGHT 200
+#define MAP_SCALE 1
+#define MAP_X_OFFSET (LCD_WIDTH / 2) - (MAP_WIDTH * MAP_SCALE) / 2
+#define MAP_Y_OFFSET LCD_HEIGHT / 2 - (MAP_HEIGHT * MAP_SCALE) / 2 - 9
 
 #define MINI_TEXT_HEIGHT 5
 
@@ -92,6 +93,7 @@ void randomAssignTerritories(game_t *game);
 void printMap(game_t *game);
 void draft(game_t *game);
 void preAttack(game_t *game);
+void attack(game_t *game);
 void preFortify(game_t *game);
 
 /*====TERRITORY====*/

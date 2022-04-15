@@ -42,6 +42,7 @@ bool initGame(game_t *game, char* fileName, uint8_t nUsers){
     dbg_sprintf(dbgout, "Initializing Continents Complete \n");
     game->map = gfx_MallocSprite(MAP_WIDTH, MAP_HEIGHT);
     zx7_Decompress(game->map, file_ptr);
+    dbg_sprintf(dbgout, "Map address: %p\n", game->map);
     ti_Close(file);
     game->paletteSize = 2 * game->nTerritories + 30;
     for(i = 0; i < 30; i++){
