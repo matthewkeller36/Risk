@@ -1,7 +1,7 @@
 #include "input.h"
 #include "graphics.h"
 
-int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uint8_t nTerritories, int8_t *choice){
+int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uint8_t nTerritories, int8_t *choice, uint8_t* redraws){
     uint8_t index;
     index = territories[territoryList[*choice]].palIndex;
     gfx_palette[index] = gfx_palette[(COLORS_BEFORE_PLAYERS + territories[territoryList[*choice]].owner->id + 6)];
@@ -20,7 +20,7 @@ int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uin
             gfx_End();
             exit(0);
         }
+        *redraws = REDRAW_ALL;
     }
-    
     return 0;
 }
