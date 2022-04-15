@@ -5,6 +5,7 @@ void runTestFile(game_t *game){
     initGame(game, "RTEST", 6);
     randomAssignTerritories(game);
     draft(game);
+    attack(game);
 }
 
 void dispTerritory(territory_t *territory, int x, int y){
