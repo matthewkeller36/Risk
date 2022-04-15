@@ -15,6 +15,9 @@ int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uin
         gfx_palette[index] = gfx_palette[(COLORS_BEFORE_PLAYERS + territories[territoryList[*choice]].owner->id)];
         return 1;
     }
+    if(kb_Rising[1] & kb_Del){
+        return 2;
+    }
     if(kb_Rising[6] & kb_Clear){
         if(exitConfirm()){
             gfx_End();
