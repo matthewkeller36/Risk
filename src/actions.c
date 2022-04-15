@@ -15,22 +15,57 @@ void draft(game_t *game){
         itoa_custom(buf, gain);
         strcat(dispText, buf);
         printAll(game, dispText);
-        if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory)){
+        if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory, &game->redraws)){
             addTroops(&game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]], 1);
             gain--;
             game->redraws ^= REDRAW_MAP | REDRAW_BOTTOM;
         }
     }
-    while(!(kb_Rising[6] & kb_Enter)){
+    while(!(kb_Rising[1] & kb_Mode)){
         kb_scan_edge();
-        printAll(game, "Press [Enter] to continue");
+        printAll(game, "Press [mode] to continue");
         if(kb_Rising[6] & kb_Clear){
             if(exitConfirm()){
                 gfx_End();
                 exit(0);
             }
+            game->redraws = REDRAW_ALL;
         }
     }
+}
+
+void genAttackArray(game_t *game, uint8_t **attackArray){
+
+    for(uint8_t i = 0; i < game->users[game->playerTurn].nTerritories; i++){
+        if(game->territories[game->users[game->playerTurn].userTerritories[i]].nTroops > 1){
+            uint8_t temp = 1;
+            for(uint8_t j = 0; j < game->territories[game->users[game->playerTurn].userTerritories[i]].nConnections; j++){
+                if(game->territories[game->territories[game->users[game->playerTurn].userTerritories[i]].connIndexes[j]].owner->id != game->playerTurn){
+                    attackArray[temp++] = game->territories[game->users[game->playerTurn].userTerritories[i]].connIndexes[j];
+                }
+            }
+        }
+    }
+}
+
+void attack(game_t* game){
+    //Generate list with territories that can attack
+    uint8_t canAttack[game->users[game->playerTurn].nTerritories], nCanAttack = 0;
+    int8_t choice = 0;
+    
+    do{
+        if(selectUserTerritory(game->territories, canAttack, nCanAttack, &choice, &game->redraws)){
+            uint8_t toAttack[game->territories[choice].nConnections], nToAttack = 0;
+            int8_t attackChoice = 0;
+            
+            do{
+                if(selectUserTerritory(game->territories, toAttack, nToAttack, &attackChoice, &game->redraws)){
+
+                }
+            }while(game->territories[choice].nTroops > 1);
+        }
+    }while(!(kb_Rising[1] & kb_Mode) && nCanAttack > 0);
+    
 }
 
 
