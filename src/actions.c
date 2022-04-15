@@ -16,7 +16,7 @@ void draft(game_t *game){
         strcat(dispText, buf);
         printAll(game, dispText);
         if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory, &game->redraws)){
-            addTroops(&game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]], 1);
+            game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]].nTroops++;
             gain--;
             game->redraws ^= REDRAW_MAP | REDRAW_BOTTOM;
         }
@@ -34,33 +34,49 @@ void draft(game_t *game){
     }
 }
 
-void genAttackArray(game_t *game, uint8_t **attackArray){
+uint8_t genAttackArray(game_t *game, uint8_t *attackArray){
+    user_t *thisUser = &game->users[game->playerTurn];
+    uint8_t numAttack = 0;
 
-    for(uint8_t i = 0; i < game->users[game->playerTurn].nTerritories; i++){
-        if(game->territories[game->users[game->playerTurn].userTerritories[i]].nTroops > 1){
-            uint8_t temp = 1;
-            for(uint8_t j = 0; j < game->territories[game->users[game->playerTurn].userTerritories[i]].nConnections; j++){
-                if(game->territories[game->territories[game->users[game->playerTurn].userTerritories[i]].connIndexes[j]].owner->id != game->playerTurn){
-                    attackArray[temp++] = game->territories[game->users[game->playerTurn].userTerritories[i]].connIndexes[j];
+    for(uint8_t i = 0; i < thisUser->nTerritories; i++){
+        territory_t thisTerritory = game->territories[thisUser->userTerritories[i]];
+        if(thisTerritory.nTroops > 1){
+            for(uint8_t j = 0; j < thisTerritory.nConnections; j++){
+                if(game->territories[thisTerritory.connIndexes[i]].owner->id != thisUser->id){
+                    attackArray[numAttack++] = thisTerritory.id;
+                    break;
                 }
             }
         }
     }
+    return numAttack;
 }
 
 void attack(game_t* game){
     //Generate list with territories that can attack
     uint8_t canAttack[game->users[game->playerTurn].nTerritories], nCanAttack = 0;
     int8_t choice = 0;
+    nCanAttack = genAttackArray(game, canAttack);
+    uint8_t selRetVal = 0;
     
     do{
-        if(selectUserTerritory(game->territories, canAttack, nCanAttack, &choice, &game->redraws)){
+        selRetVal = selectUserTerritory(game->territories, canAttack, nCanAttack, &choice, &game->redraws);
+        if(selRetVal == 1){
             uint8_t toAttack[game->territories[choice].nConnections], nToAttack = 0;
             int8_t attackChoice = 0;
+            for(uint8_t i = 0; i < game->territories[choice].nConnections; i++){
+                if(game->territories[game->territories[choice].connIndexes[i]].owner->id != game->playerTurn){
+                    toAttack[nToAttack++] = game->territories[choice].connIndexes[i];
+                }
+            }
             
             do{
-                if(selectUserTerritory(game->territories, toAttack, nToAttack, &attackChoice, &game->redraws)){
-
+                selRetVal = selectUserTerritory(game->territories, toAttack, nToAttack, &attackChoice, &game->redraws);
+                if(selRetVal == 2){     // Del pressed, cancel attack between territories
+                    break;
+                }
+                if(selRetVal == 1){
+                    //Attack between two territories
                 }
             }while(game->territories[choice].nTroops > 1);
         }
@@ -71,17 +87,9 @@ void attack(game_t* game){
 
 /*====TERRITORY====*/
 
-void addTroops(territory_t *territory, int numAdd){
-    territory->nTroops += numAdd;
-}
-
-void removeTroops(territory_t *territory, int numRemove){
-    territory->nTroops -= numRemove;
-}
-
 void transferTroops(territory_t *from, territory_t *to, int numMove){
-    removeTroops(from, numMove);
-    addTroops(to, numMove);
+    from->nTroops -= numMove;
+    to->nTroops += numMove;
 }
 
 void gainTerritory(user_t *user, territory_t *territory){
@@ -137,10 +145,6 @@ void updateContinentOwnership(continent_t *continents, uint8_t nContinents, user
 
 void setOwnedContinent(user_t *user, continent_t *continent){
     continent->owner = user;
-}
-
-void setNullContinent(continent_t *continent){
-    continent->owner = NULL;
 }
 
 /*====USER====*/
