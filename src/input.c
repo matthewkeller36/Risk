@@ -5,7 +5,7 @@ int8_t selectUserTerritory(territory_t *territories, uint8_t *territoryList, uin
     uint8_t index;
     index = territories[territoryList[*choice]].palIndex;
     gfx_palette[index] = gfx_palette[(COLORS_BEFORE_PLAYERS + territories[territoryList[*choice]].owner->id + 6)];
-    kb_scan_edge();
+    kb_scan_rising();
     if(kb_Rising[7]){
         gfx_palette[index] = gfx_palette[(COLORS_BEFORE_PLAYERS + territories[territoryList[*choice]].owner->id)];
         if((kb_Rising[7] & kb_Right) || (kb_Rising[7] & kb_Up)) *choice = (*choice + 1) % nTerritories;

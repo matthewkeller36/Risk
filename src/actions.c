@@ -15,14 +15,14 @@ void draft(game_t *game){
         itoa_custom(buf, gain);
         strcat(dispText, buf);
         printAll(game, dispText);
-        if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory, &game->redraws)){
+        if(selectUserTerritory(game->territories, game->users[game->playerTurn].userTerritories, game->users[game->playerTurn].nTerritories, &selectedTerritory, &game->redraws) == 1){
             game->territories[game->users[game->playerTurn].userTerritories[selectedTerritory]].nTroops++;
             gain--;
             game->redraws ^= REDRAW_MAP | REDRAW_BOTTOM;
         }
     }
     while(!(kb_Rising[1] & kb_Mode)){
-        kb_scan_edge();
+        kb_scan_rising();
         printAll(game, "Press [mode] to continue");
         if(kb_Rising[6] & kb_Clear){
             if(exitConfirm()){
@@ -37,11 +37,13 @@ void draft(game_t *game){
 uint8_t genAttackArray(game_t *game, uint8_t *attackArray){
     user_t *thisUser = &game->users[game->playerTurn];
     uint8_t numAttack = 0;
+    uint8_t nTerritories = thisUser->nTerritories;
 
-    for(uint8_t i = 0; i < thisUser->nTerritories; i++){
+    for(uint8_t i = 0; i < nTerritories; i++){
         territory_t thisTerritory = game->territories[thisUser->userTerritories[i]];
         if(thisTerritory.nTroops > 1){
-            for(uint8_t j = 0; j < thisTerritory.nConnections; j++){
+            uint8_t nConnections = thisTerritory.nConnections;
+            for(uint8_t j = 0; j < nConnections; j++){
                 if(game->territories[thisTerritory.connIndexes[i]].owner->id != thisUser->id){
                     attackArray[numAttack++] = thisTerritory.id;
                     break;

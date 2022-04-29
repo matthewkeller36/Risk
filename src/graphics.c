@@ -135,7 +135,7 @@ uint8_t exitConfirm(){
     do{
         gfx_SetColor(WATER_INDEX);
         gfx_Rectangle_NoClip((LCD_WIDTH - 78 + choice * 88) / 2, (LCD_HEIGHT + 40) / 2 - 2, 28, 12);
-        kb_scan_edge();
+        kb_scan_rising();
         if(kb_Rising[7]){
             choice = (choice + 1) % 2;
         }
