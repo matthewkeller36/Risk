@@ -30,8 +30,27 @@ void kb_scan_edge(){
     int i;
     kb_Scan();
     for(i = 0; i < 8; i++){
-        kb_Rising[i] = (kb_Data[i] ^ kb_Previous[i]) & kb_Data[i];
-        kb_Falling[i] = (kb_Data[i] ^ kb_Previous[i]) & kb_Previous[i];
+        kb_Rising[i] = ~kb_Previous[i] & kb_Data[i];
+        kb_Falling[i] = kb_Previous[i] & ~kb_Data[i];
+        kb_Previous[i] = kb_Data[i];
+    }
+}
+
+void kb_scan_rising(){
+    int i;
+    kb_Scan();
+    for(i = 0; i < 8; i++){
+        kb_Rising[i] = ~kb_Previous[i] & kb_Data[i];
+        kb_Previous[i] = kb_Data[i];
+    }
+}
+
+void kb_scan_falling(){
+    int i;
+    kb_Scan();
+
+    for(i = 0; i < 8; i++){
+        kb_Falling[i] = kb_Previous[i] & ~kb_Data[i];
         kb_Previous[i] = kb_Data[i];
     }
 }
